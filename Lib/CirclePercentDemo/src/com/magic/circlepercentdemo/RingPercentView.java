@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
 import android.graphics.Paint;
+import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
 import android.graphics.PathEffect;
@@ -17,20 +18,30 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class RingPercentView extends View {
-	private int startAngle;// ¿ªÊ¼½Ç¶È
-	private int sweepAngle;// É¨¹ý½Ç¶È
-	private int radius = 0;// Ô²»·°ë¾¶
-	private int ringFrontColor = Color.RED;// Ô²»·µÄÇ°¾°É«
-	private int ringBackColor = Color.BLUE;// Ô²»·µÄ±³¾°É«
-	private int strokeWidth = 30;// Ô²»·µÄ¿í¶È
-	private int drawInterTime;// »æÖÆµÄËÙ¶È
-	private int currentSweepAngle;// µ±Ç°É¨¹ý
-	private int bgStartAngle;//±³¾°¿ªÊ¼½Ç¶È
-	private int bgSweepAngle;//±³¾°É¨¹ý½Ç¶È
-	private boolean isDrawCircleBg = true;// ÊÇ·ñ»¹Õû¸öÔ²»·±³¾°
-	private boolean isCircleFillView = false;// µ±°ë¾¶Îª0Ê±ÊÇ·ñÉèÖÃÎª¿Ø¼þµÄ¿í¶È.ÈôÊÇÔòÎª¿Ø¼þ¿í¶È£¬Èô²»ÊÇÔò²»»æÖÆÔ²»·
-	Paint ringPaint;// Ô²»·µÄ»­±Ê
-	Paint ringBgPaint;// Ô²»·±³¾°µÄ»­±Ê
+	private int startAngle;// å¼€å§‹è§’åº¦
+	private int sweepAngle;// æ‰«è¿‡è§’åº¦
+	private int radius = 0;// åœ†çŽ¯åŠå¾„
+	private int ringFrontColor = Color.RED;// åœ†çŽ¯çš„å‰æ™¯è‰²
+	private int ringBackColor = Color.BLUE;// åœ†çŽ¯çš„èƒŒæ™¯è‰²
+	private int strokeWidth = 30;// åœ†çŽ¯çš„å®½åº¦
+	private int drawInterTime;// ç»˜åˆ¶çš„é€Ÿåº¦
+	private int currentSweepAngle;// å½“å‰æ‰«è¿‡
+	private int bgStartAngle;// èƒŒæ™¯å¼€å§‹è§’åº¦
+	private int bgSweepAngle;// èƒŒæ™¯æ‰«è¿‡è§’åº¦
+	private boolean isDrawCircleBg = true;// æ˜¯å¦è¿˜æ•´ä¸ªåœ†çŽ¯èƒŒæ™¯
+	private boolean isCircleFillView = false;// å½“åŠå¾„ä¸º0æ—¶æ˜¯å¦è®¾ç½®ä¸ºæŽ§ä»¶çš„å®½åº¦.è‹¥æ˜¯åˆ™ä¸ºæŽ§ä»¶å®½åº¦ï¼Œè‹¥ä¸æ˜¯åˆ™ä¸ç»˜åˆ¶åœ†çŽ¯
+	private int textSizePrimaryText=40;//ä¸»è¦æ–‡å­—çš„å¤§å°
+	private int textColorPrimaryText=Color.BLUE;//ä¸»è¦æ–‡å­—çš„é¢œè‰²
+	private int textSizeSecondryText=30;//æ¬¡è¦æ–‡å­—çš„å¤§å°
+	private int textColorSecondText=Color.RED;//æ¬¡è¦æ–‡å­—çš„å¤§å°
+	private String primarText="20%";//ä¸»è¦æ–‡å­—å†…å®¹
+	private String secondaryText="30%";//æ¬¡è¦æ–‡å­—å†…å®¹
+	private boolean isDynamic=true;//æ˜¯å¦åŠ¨æ€çš„æ›´æ–°ç™¾åˆ†æ¯”
+	private int percent;//ç™¾åˆ†æ¯”
+	Paint ringPaint;// åœ†çŽ¯çš„ç”»ç¬”
+	Paint ringBgPaint;// åœ†çŽ¯èƒŒæ™¯çš„ç”»ç¬”
+	Paint primaryTextPaint;//ä¸»è¦æ–‡å­—çš„ç”»ç¬”
+	Paint secondaryTextPaint;//æ¬¡è¦æ–‡å­—çš„ç”»ç¬”
 	Timer timer;
 
 	public RingPercentView(Context context, AttributeSet attrs) {
@@ -52,6 +63,52 @@ public class RingPercentView extends View {
 		ringBgPaint.setStrokeWidth(strokeWidth);
 		ringBgPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 		ringBgPaint.setStrokeCap(Paint.Cap.ROUND);
+		
+		primaryTextPaint=new Paint();
+		primaryTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+		primaryTextPaint.setTextSize(textSizePrimaryText);
+		primaryTextPaint.setColor(textColorPrimaryText);
+		
+		secondaryTextPaint=new Paint();
+		secondaryTextPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+		secondaryTextPaint.setTextSize(textSizeSecondryText);
+		secondaryTextPaint.setTextSize(textColorSecondText);
+	}
+
+	public void setFrontColor(int color) {
+		ringFrontColor = color;
+		ringPaint.setColor(ringFrontColor);
+	}
+
+	public void setBgColor(int color) {
+		ringBackColor = color;
+		ringPaint.setColor(ringBackColor);
+		ringBgPaint.setStrokeWidth(strokeWidth);
+		ringPaint.setStrokeWidth(strokeWidth);
+	}
+	
+	public void setIsDynamicAnimation(boolean isDynamic){
+		this.isDynamic=isDynamic;
+	}
+	
+	public void setPrimaryTextParam(int textSize,int textColor,String text){
+		textSizePrimaryText=textSize;
+		textColorPrimaryText=textColor;
+		primaryTextPaint.setColor(textColorPrimaryText);
+		primaryTextPaint.setTextSize(textSizePrimaryText);
+		primarText=text;
+	}
+	
+	public void setSecondryTextParam(int textSize,int textColor,String text){
+		textSizeSecondryText=textSize;
+		textColorSecondText=textColor;
+		secondaryText=text;
+		secondaryTextPaint.setColor(textColorSecondText);
+		secondaryTextPaint.setTextSize(textSizeSecondryText);
+	}
+
+	public void setRingWidth(int width) {
+		strokeWidth = width;
 	}
 
 	@Override
@@ -69,8 +126,8 @@ public class RingPercentView extends View {
 		if (heightMode == MeasureSpec.AT_MOST) {
 			heightSize = radius * 2 > heightSize ? heightSize : radius * 2;
 		}
-		
-		//radius=getRealRadius(radius);
+
+		// radius=getRealRadius(radius);
 		setMeasuredDimension(MeasureSpec.makeMeasureSpec(widthSize, widthMode),
 				MeasureSpec.makeMeasureSpec(heightSize, heightMode));
 	}
@@ -81,13 +138,15 @@ public class RingPercentView extends View {
 			if (!isCircleFillView)
 				return;
 		}
-		
+
 		canvas.translate(getMeasuredWidth() / 2, getMeasuredHeight() / 2);
 		drawRing(canvas);
+		drawPrimaryText(canvas);
+		drawSecondaryText(canvas);
 	}
 
 	private void drawRing(Canvas canvas) {
-		int radius=getRealRadius(this.radius);
+		int radius = getRealRadius(this.radius);
 		if (isDrawCircleBg) {
 			Path bgpath = new Path();
 			RectF ovalBG = new RectF(-radius, -radius, radius, radius);
@@ -102,30 +161,51 @@ public class RingPercentView extends View {
 		canvas.drawPath(frontPath, ringPaint);
 	}
 
-	public void setBg(int bgStartAngle,int bgSweepAngle){
-		this.bgStartAngle=bgStartAngle;
-		this.bgSweepAngle=bgSweepAngle;
+	public void setBg(int bgStartAngle, int bgSweepAngle,int ringBackColor) {
+		this.bgStartAngle = bgStartAngle;
+		this.bgSweepAngle = bgSweepAngle;
+		this.ringBackColor=ringBackColor;
 	}
-	
+
 	public void drawRing(int startAngle, int sweepAngle, int radius, boolean isDrawCircle, int totalDrawTime) {
 		this.startAngle = startAngle;
 		this.sweepAngle = sweepAngle;
-		
-		this.radius = radius ;
+
+		this.radius = radius;
 		this.isDrawCircleBg = isDrawCircle;
 		this.drawInterTime = totalDrawTime / sweepAngle;
 		startDrawRing(drawInterTime);
 	}
 
+	
+	public void drawArcRing(int startAngle, int radius, int  percent, int totalDrawTime) {
+		this.startAngle = startAngle;
+		this.sweepAngle = (int) (bgSweepAngle*percent*0.01);
+		this.percent=percent;
+		this.radius = radius;
+		this.drawInterTime = totalDrawTime / percent;
+		startDrawRing(drawInterTime);
+	}
+	
+	public void drawCircleRing(int startAngle,int percent,int radius,int totalDrawTime){
+		this.startAngle = startAngle;
+		this.sweepAngle = (int) (percent*3.6);
+		this.percent=percent;
+		this.radius = radius;
+		this.isDrawCircleBg = true;
+		this.drawInterTime = totalDrawTime / percent;
+		startDrawRing(drawInterTime);
+	}
+	
 	public int getRealRadius(int radius) {
-		// ÈôÔ²»·Ö±¾¶´óÓÚÊÓÍ¼¿í¶ÈÔòÖ±¾¶ÎªÊÓÍ¼¿í¶È
+		// è‹¥åœ†çŽ¯ç›´å¾„å¤§äºŽè§†å›¾å®½åº¦åˆ™ç›´å¾„ä¸ºè§†å›¾å®½åº¦
 		int circleTempSize = (getMeasuredHeight() > getMeasuredWidth() ? getMeasuredWidth() : getMeasuredHeight()) / 2;
 		radius = radius > circleTempSize ? circleTempSize : radius;
-		return radius-strokeWidth;
+		return radius - strokeWidth;
 	}
 
 	private void startDrawRing(int peroidTime) {
-		currentSweepAngle=0;
+		currentSweepAngle = 0;
 		if (timer != null) {
 			timer.cancel();
 		}
@@ -135,6 +215,11 @@ public class RingPercentView extends View {
 			@Override
 			public void run() {
 				currentSweepAngle++;
+				
+				if(isDynamic){
+					primarText=(int)((currentSweepAngle*100/sweepAngle)*percent*0.01)+"%";
+				}
+				
 				if (currentSweepAngle > sweepAngle) {
 					timer.cancel();
 				} else {
@@ -145,4 +230,18 @@ public class RingPercentView extends View {
 
 	}
 
+	private void drawPrimaryText(Canvas canvas){
+		float textWidth=primaryTextPaint.measureText(primarText);
+		FontMetrics fm=primaryTextPaint.getFontMetrics();
+		float textHeight=primaryTextPaint.getFontMetrics().bottom-primaryTextPaint.getFontMetrics().top;
+		canvas.drawText(primarText, -textWidth/2, fm.descent, primaryTextPaint);
+	}
+	
+	private void drawSecondaryText(Canvas canvas){
+		float textWidth=secondaryTextPaint.measureText(secondaryText);
+		FontMetrics fmSecondary=secondaryTextPaint.getFontMetrics();
+		FontMetrics fmPrimary=primaryTextPaint.getFontMetrics();
+		//float textHeight=secondaryTextPaint.getFontMetrics().bottom-primaryTextPaint.getFontMetrics().top;
+		canvas.drawText(secondaryText, -textWidth/2, fmPrimary.descent+fmSecondary.descent-fmSecondary.ascent, secondaryTextPaint);
+	}
 }

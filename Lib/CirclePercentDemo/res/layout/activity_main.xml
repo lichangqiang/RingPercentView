@@ -7,17 +7,18 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.magic.circlepercentdemo.MainActivity"
-    android:orientation="vertical" >
+    android:orientation="vertical"
+    android:background="#3268E3" >
 
     <com.magic.circlepercentdemo.RingPercentView
         android:id="@+id/arc_percent"
-        android:layout_width="100dp"
-        android:layout_height="100dp" />
+        android:layout_width="150dp"
+        android:layout_height="150dp" />
 
     <com.magic.circlepercentdemo.RingPercentView
         android:id="@+id/circle_percent"
-        android:layout_width="100dp"
-        android:layout_height="100dp" />
+        android:layout_width="150dp"
+        android:layout_height="150dp" />
 
     <Button android:layout_width="wrap_content"
         android:layout_height="wrap_content"
