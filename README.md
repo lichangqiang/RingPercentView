@@ -16,5 +16,7 @@ ring.setBg(0, 360,Color.rgb(30, 96, 200));//设置圆环背景</br>
 	 * @param radius 半径</br>
 	 * @param totalDrawTime 动画总时间</br>
 	 */</br>
+	//绘制圆环
 	public void drawCircleRing(int startAngle,int percent,int radius,int totalDrawTime)</br>
+	//绘制扇形
         public void drawArcRing(int startAngle, int radius, int  percent, int totalDrawTime) 
