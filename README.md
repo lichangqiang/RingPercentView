@@ -5,7 +5,6 @@
 <br>
 <h1>一、使用方法</h1>
 <b>1)在Layout中使用如下声明</b></br>
-</br>
 <com.magic.circlepercentdemo.RingPercentView</br>
         android:id="@+id/arc_percent"</br>
         android:layout_width="wrap_content"</br>
@@ -14,6 +13,7 @@
         app:isRing="false"</br>
         /></br>
         其中radus表示半径,isRing表示是否绘制圆环</br>
+        
 <b>2)初始化参数</b></br>
 ring.setBg(0, 360,Color.rgb(30, 96, 200));//设置圆环背景</br>
 		ring.setFrontColor(Color.rgb(255, 255, 255));//设置圆环前景</br>
