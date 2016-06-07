@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.CornerPathEffect;
@@ -37,19 +38,26 @@ public class RingPercentView extends View {
 	private String primarText="20%";//主要文字内容
 	private String secondaryText="30%";//次要文字内容
 	private boolean isDynamic=true;//是否动态的更新百分比
+	private boolean isDrawRing=true;
 	private int percent;//百分比
 	Paint ringPaint;// 圆环的画笔
 	Paint ringBgPaint;// 圆环背景的画笔
 	Paint primaryTextPaint;//主要文字的画笔
 	Paint secondaryTextPaint;//次要文字的画笔
 	Timer timer;
+	private String unit="%";
 
 	public RingPercentView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		TypedArray typeArray=getContext().obtainStyledAttributes(attrs, R.styleable.RingPercent);
+		radius=typeArray.getDimensionPixelSize(R.styleable.RingPercent_radius, 0);
+		isDrawRing=typeArray.getBoolean(R.styleable.RingPercent_isRing, true);
 		init();
+		typeArray.recycle();
 	}
 
 	private void init() {
+		
 		ringPaint = new Paint();
 		ringPaint.setColor(ringFrontColor);
 		ringPaint.setStyle(Style.STROKE);
@@ -82,7 +90,7 @@ public class RingPercentView extends View {
 
 	public void setBgColor(int color) {
 		ringBackColor = color;
-		ringPaint.setColor(ringBackColor);
+		ringBgPaint.setColor(ringBackColor);
 		ringBgPaint.setStrokeWidth(strokeWidth);
 		ringPaint.setStrokeWidth(strokeWidth);
 	}
@@ -91,12 +99,13 @@ public class RingPercentView extends View {
 		this.isDynamic=isDynamic;
 	}
 	
-	public void setPrimaryTextParam(int textSize,int textColor,String text){
+	public void setPrimaryTextParam(int textSize,int textColor,String unit){
 		textSizePrimaryText=textSize;
 		textColorPrimaryText=textColor;
 		primaryTextPaint.setColor(textColorPrimaryText);
 		primaryTextPaint.setTextSize(textSizePrimaryText);
-		primarText=text;
+		//primarText=text;
+		this.unit=unit;
 	}
 	
 	public void setSecondryTextParam(int textSize,int textColor,String text){
@@ -109,6 +118,8 @@ public class RingPercentView extends View {
 
 	public void setRingWidth(int width) {
 		strokeWidth = width;
+		ringPaint.setStrokeWidth(strokeWidth);
+		ringBgPaint.setStrokeWidth(strokeWidth);
 	}
 
 	@Override
@@ -124,14 +135,26 @@ public class RingPercentView extends View {
 		}
 
 		if (heightMode == MeasureSpec.AT_MOST) {
-			heightSize = radius * 2 > heightSize ? heightSize : radius * 2;
+			if(radius*2>widthSize){
+				radius=widthSize/2;
+			}
+			if(isDrawRing){
+				heightSize=radius*2;
+			}else{
+				heightSize =radius+getRingBottom();
+			}
 		}
-
-		// radius=getRealRadius(radius);
-		setMeasuredDimension(MeasureSpec.makeMeasureSpec(widthSize, widthMode),
-				MeasureSpec.makeMeasureSpec(heightSize, heightMode));
+		
+		
+		setMeasuredDimension(widthSize,heightSize);
 	}
 
+	
+	public int getRingBottom(){
+		int length=(int) (Math.sin(Math.toRadians(bgStartAngle))*radius);
+		return length;
+	}
+	
 	@Override
 	protected void onDraw(Canvas canvas) {
 		if (radius == 0) {
@@ -139,14 +162,21 @@ public class RingPercentView extends View {
 				return;
 		}
 
-		canvas.translate(getMeasuredWidth() / 2, getMeasuredHeight() / 2);
 		drawRing(canvas);
+		canvas.translate(getMeasuredWidth() / 2, getMeasuredHeight() / 2);
 		drawPrimaryText(canvas);
 		drawSecondaryText(canvas);
 	}
 
 	private void drawRing(Canvas canvas) {
+		canvas.save();
 		int radius = getRealRadius(this.radius);
+		if(!isDrawRing){
+			int move=radius-getRingBottom();
+			canvas.translate(getMeasuredWidth()/2, (getMeasuredHeight()+move)/2);
+		}else{
+			canvas.translate(getMeasuredWidth()/2, getMeasuredHeight()/2);
+		}
 		if (isDrawCircleBg) {
 			Path bgpath = new Path();
 			RectF ovalBG = new RectF(-radius, -radius, radius, radius);
@@ -156,27 +186,22 @@ public class RingPercentView extends View {
 
 		Path frontPath = new Path();
 		ringPaint.setColor(ringFrontColor);
-		RectF ovalFront = new RectF(-radius, -radius, radius, radius);
+		RectF ovalFront = new RectF(-radius, -radius, radius,radius);
 		frontPath.addArc(ovalFront, startAngle, currentSweepAngle);
 		canvas.drawPath(frontPath, ringPaint);
+		canvas.restore();
 	}
 
 	public void setBg(int bgStartAngle, int bgSweepAngle,int ringBackColor) {
 		this.bgStartAngle = bgStartAngle;
 		this.bgSweepAngle = bgSweepAngle;
 		this.ringBackColor=ringBackColor;
+		ringBgPaint.setColor(ringBackColor);
 	}
 
-	public void drawRing(int startAngle, int sweepAngle, int radius, boolean isDrawCircle, int totalDrawTime) {
-		this.startAngle = startAngle;
-		this.sweepAngle = sweepAngle;
-
-		this.radius = radius;
-		this.isDrawCircleBg = isDrawCircle;
-		this.drawInterTime = totalDrawTime / sweepAngle;
-		startDrawRing(drawInterTime);
+	public void drawArcRing(int startAngle, int  percent, int totalDrawTime) {
+		drawArcRing(startAngle,radius,percent,totalDrawTime);
 	}
-
 	
 	public void drawArcRing(int startAngle, int radius, int  percent, int totalDrawTime) {
 		this.startAngle = startAngle;
@@ -184,9 +209,22 @@ public class RingPercentView extends View {
 		this.percent=percent;
 		this.radius = radius;
 		this.drawInterTime = totalDrawTime / percent;
+		isDrawRing=false;
+		requestLayout();
 		startDrawRing(drawInterTime);
 	}
 	
+	public void drawCircleRing(int startAngle,int percent,int totalDrawTime){
+		drawCircleRing(startAngle,percent,radius,totalDrawTime);
+	}
+	
+	/**
+	 * 
+	 * @param startAngle开始角度
+	 * @param percent 百分比
+	 * @param radius 半径
+	 * @param totalDrawTime 动画总时间
+	 */
 	public void drawCircleRing(int startAngle,int percent,int radius,int totalDrawTime){
 		this.startAngle = startAngle;
 		this.sweepAngle = (int) (percent*3.6);
@@ -194,13 +232,14 @@ public class RingPercentView extends View {
 		this.radius = radius;
 		this.isDrawCircleBg = true;
 		this.drawInterTime = totalDrawTime / percent;
+		requestLayout();
 		startDrawRing(drawInterTime);
 	}
 	
 	public int getRealRadius(int radius) {
 		// 若圆环直径大于视图宽度则直径为视图宽度
-		int circleTempSize = (getMeasuredHeight() > getMeasuredWidth() ? getMeasuredWidth() : getMeasuredHeight()) / 2;
-		radius = radius > circleTempSize ? circleTempSize : radius;
+		/*int circleTempSize = (getMeasuredHeight() > getMeasuredWidth() ? getMeasuredWidth() : getMeasuredHeight()) / 2;
+		radius = radius > circleTempSize ? circleTempSize : radius;*/
 		return radius - strokeWidth;
 	}
 
@@ -217,7 +256,7 @@ public class RingPercentView extends View {
 				currentSweepAngle++;
 				
 				if(isDynamic){
-					primarText=(int)((currentSweepAngle*100/sweepAngle)*percent*0.01)+"%";
+					primarText=(int)((currentSweepAngle*100/sweepAngle)*percent*0.01)+unit;
 				}
 				
 				if (currentSweepAngle > sweepAngle) {
@@ -241,7 +280,12 @@ public class RingPercentView extends View {
 		float textWidth=secondaryTextPaint.measureText(secondaryText);
 		FontMetrics fmSecondary=secondaryTextPaint.getFontMetrics();
 		FontMetrics fmPrimary=primaryTextPaint.getFontMetrics();
-		//float textHeight=secondaryTextPaint.getFontMetrics().bottom-primaryTextPaint.getFontMetrics().top;
-		canvas.drawText(secondaryText, -textWidth/2, fmPrimary.descent+fmSecondary.descent-fmSecondary.ascent, secondaryTextPaint);
+		int move=0;
+		if(!isDrawRing){
+			int pos=(int) (getBottom()/2-(fmSecondary.descent-fmSecondary.ascent));
+			canvas.drawText(secondaryText, -textWidth/2,getBottom()/2-(fmSecondary.descent-fmSecondary.ascent)/2, secondaryTextPaint);
+		}else{
+			canvas.drawText(secondaryText, -textWidth/2, fmPrimary.descent+fmSecondary.descent-fmSecondary.ascent, secondaryTextPaint);
+		}	
 	}
 }

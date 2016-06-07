@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="RingPercent">
+        <attr name="radius" format="dimension" />
+        <attr name="isRing" format="boolean" />
+    </declare-styleable>
+
+</resources>

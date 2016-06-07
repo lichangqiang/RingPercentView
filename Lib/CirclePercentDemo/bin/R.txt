@@ -118,6 +118,7 @@ int attr imageButtonStyle 0x7f010041
 int attr indeterminateProgressStyle 0x7f01007f
 int attr initialActivityCount 0x7f0100a1
 int attr isLightTheme 0x7f010002
+int attr isRing 0x7f0100d2
 int attr itemPadding 0x7f010081
 int attr layout 0x7f010094
 int attr listChoiceBackgroundIndicator 0x7f010052
@@ -153,6 +154,7 @@ int attr progressBarStyle 0x7f01007e
 int attr queryBackground 0x7f01009f
 int attr queryHint 0x7f010096
 int attr radioButtonStyle 0x7f01006a
+int attr radius 0x7f0100d1
 int attr ratingBarStyle 0x7f01006b
 int attr ratingBarStyleIndicator 0x7f01006c
 int attr ratingBarStyleSmall 0x7f01006d
@@ -1173,6 +1175,9 @@ int styleable PopupWindow_android_popupBackground 0
 int styleable PopupWindow_overlapAnchor 1
 int[] styleable PopupWindowBackgroundState { 0x7f0100b6 }
 int styleable PopupWindowBackgroundState_state_above_anchor 0
+int[] styleable RingPercent { 0x7f0100d1, 0x7f0100d2 }
+int styleable RingPercent_isRing 1
+int styleable RingPercent_radius 0
 int[] styleable SearchView { 0x010100da, 0x0101011f, 0x01010220, 0x01010264, 0x7f010094, 0x7f010095, 0x7f010096, 0x7f010097, 0x7f010098, 0x7f010099, 0x7f01009a, 0x7f01009b, 0x7f01009c, 0x7f01009d, 0x7f01009e, 0x7f01009f, 0x7f0100a0 }
 int styleable SearchView_android_focusable 0
 int styleable SearchView_android_imeOptions 3
