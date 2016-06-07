@@ -32,3 +32,5 @@ ring.setBg(0, 360,Color.rgb(30, 96, 200));//设置圆环背景</br>
 	public void drawCircleRing(int startAngle,int percent,int totalDrawTime)</br>
 	//绘制扇形
         public void drawArcRing(int startAngle,  int  percent, int totalDrawTime) 
+</br>欢迎大家访问我的博客提供宝贵建议</br>
+<a href='http://blog.csdn.net/lcq376645763'>http://blog.csdn.net/lcq376645763</a></br>
